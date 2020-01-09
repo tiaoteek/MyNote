@@ -44,18 +44,19 @@ git reset --hard commit_id
 # 撤销修改
 ## 仅工作区修改
 ```bash
-git checkout --<filename>   //撤销工作区的更改(用版本库里的版本替换工作区的版本)
+
+
 ```
 
 ## 仅提交到暂存区
 ```bash
-git reset HEAD <filename>   //撤销暂存区的修改，返回工作区
-git checkout --<filename>   //撤销工作区的更改
+
 ```
 
 ## 提交到分支
 ```bash
-git reset --hard commit_id  //跳转版本(同版本回退)
+
+
 ```
 # 删除文件
 ```bash
@@ -78,12 +79,8 @@ git remote add origin git@github.com:username/reponame.git
 git push -u origin master
 //推送最新修改
 git push origin master　　
-```
-
-使用命令　　
-
-```bash
-git push origin master　　//推送最新修改
+//或者
+git push
 ```
 
 # 创建与合并分支

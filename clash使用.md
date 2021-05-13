@@ -71,6 +71,23 @@ dns:
    #下面添节点信息，根据机场文件添加
 ```
 
+### 添加桌面快捷方式
+
+桌面新建**clash.desktop**文件
+
+```
+[Desktop Entry]
+Encoding=UTF-8
+Name=启动clash
+Type=Application
+StartupNotify=true
+Terminal=true
+Exec=nohup clash &
+Icon=/home/tiaoteek/Soft/clash/logo.clash.png		#这里是自定义的软件logo地址，可以不要
+```
+
+
+
 ## 树莓派：
 
 使用方法同linux，下载armv7l 版本，可以作为其他设备的透明代理

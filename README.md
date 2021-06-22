@@ -1,6 +1,8 @@
 # MyNote
 学习笔记
-├── 学会学习（CM100）.md
+
+├── experience
+│   └── 学会学习（CM100）.md
 ├── paper
 │   ├── cv_base
 │   └── Object Detection

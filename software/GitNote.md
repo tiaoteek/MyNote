@@ -219,7 +219,11 @@ git config --global user.email "user-mail@mail.com"
 ssh-keygen -t rsa -C "youremail@example.com"
 ```
 
-这是为了生成私钥， `-C "youremail@example.com"`  可不要
+代码参数含义：
+
+-t 指定密钥类型，默认是 rsa ，可以省略。
+-C 设置注释文字，比如邮箱。
+-f 指定密钥文件存储文件名。
 
 `id_rsa`是私钥，不能泄露出去，`id_rsa.pub`是公钥，可以放心地告诉任何人
 

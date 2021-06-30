@@ -1,0 +1,38 @@
+# 使用MySQL
+
+## 连接MYSQL
+
+```
+mysql -uroot -p
+```
+
+用户名`root`与`-u`之间空格可有可无，
+
+`-p`后可直接接密码，但注意**不要有空格**，
+
+`-D`接上数据库名称，如果在sql脚本文件中使用了`use 数据库`，则`-D`选项可以忽略, 手动链接的话需要带上，否则无法访问数据库的信息。
+
+## 修改密码
+
+```
+mysqladmin -u用户名 -p旧密码 password 新密码
+
+mysqladmin -uroot -password 123
+mysqladmin -uroot -p123 password 456
+```
+
+
+
+## 导入.sql文件
+
+命令行中：
+
+```
+mysql -u root -p < init-test-data.sql
+```
+
+mysql中：
+
+```
+mysql> source  d:/myprogram/database/db.sql;
+```

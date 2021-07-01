@@ -317,5 +317,85 @@ SELECT * FROM students WHERE (score < 80 OR score > 90) AND gender = 'M';
 | **使用<>判断不相等** | score <> 80     | name <> 'abc'    |                                                   |
 | **使用LIKE判断相似** | name LIKE 'ab%' | name LIKE '%bc%' | %表示任意字符，例如'ab%'将匹配'ab'，'abc'，'abcd' |
 
+查询分数在60分(含)～90分(含)
 
+```sql
+SELECT * FROM students WHERE score >= 60 AND score <= 90
+SELECT * FROM students  WHERE score BETWEEN 60 AND 90
+```
+
+## 投影查询
+
+让结果集仅包含指定列。这种操作称为**投影查询**
+
+```sql
+SELECT 列1, 列2, 列3 FROM ...
+SELECT id, score, name FROM students;
+```
+
+## 排序
+
+查询结果集通常是按照`id`排序的，也就是主键排序，`ORDER BY`子句按其他列排序，默认高到低，加上`DESC`表示“倒序”，如果`score`列有相同的数据，要进一步排序，可以继续添加列名。
+
+```sql
+SELECT id, name, gender, score 
+FROM students 
+ORDER BY score DESC, gender;
+```
+
+默认的排序规则是`ASC`：“升序”，即从小到大。`ASC`可以省略，即`ORDER BY score ASC`和`ORDER BY score`效果一样。如果有`WHERE`子句，那么`ORDER BY`子句要放到`WHERE`子句后面。
+
+```sql
+select id,name,gender,score from students
+where class_id = 1
+order by score desc ,gender;
+```
+
+## 分页查询
+
+分页实际上就是从结果集中“截取”出第M~N条记录。这个查询可以通过`LIMIT <M> OFFSET <N>`子句实现.
+
+- `LIMIT`总是设定为`pageSize`；
+- `OFFSET`计算公式为`pageSize * (pageIndex - 1)`。
+- `OFFSET`超过了查询的最大数量并不会报错，而是得到一个空的结果集。
+
+```sql
+select id,name,gender,score from students
+order by score desc
+limit 5 offset 0;       # 每页5条第1页
+```
+
+## 聚合查询
+
+对于统计总数、平均数这类计算，SQL提供了专门的聚合函数，使用聚合函数进行查询，就是聚合查询，它可以快速获得结果。
+
+```sql
+SELECT COUNT(*) FROM students;		#统计个数，COUNT(*)和COUNT(id)实际上是一样的效果。
+SELECT COUNT(*) num FROM students;	#统计并设别名num
+```
+
+除了`COUNT()`函数外，SQL还提供了如下聚合函数：
+
+| 函数    | 说明                                                   |
+| :------ | :----------------------------------------------------- |
+| SUM     | 计算某一列的合计值，该列必须为数值类型                 |
+| AVG     | 计算某一列的平均值，该列必须为数值类型                 |
+| MAX     | 计算某一列的最大值                                     |
+| MIN     | 计算某一列的最小值                                     |
+| COUNT   | 统计总个数                                             |
+| ROUND   | 四舍五入一个正数或者负数，结果为一定长度的值           |
+| CEILING | 返回最小的整数，使这个整数大于或等于指定数的数值运算。 |
+| FLOOR   | 返回最大整数，使这个整数小于或等于指定数的数值运算。   |
+
+注意，`MAX()`和`MIN()`函数并不限于数值类型。如果是字符类型，`MAX()`和`MIN()`会返回排序最后和排序最前的字符。
+
+要特别注意：如果聚合查询的`WHERE`条件没有匹配到任何行，`COUNT()`会返回0，而`SUM()`、`AVG()`、`MAX()`和`MIN()`会返回`NULL`：
+
+
+
+## 多表查询
+
+
+
+## 连接查询
 

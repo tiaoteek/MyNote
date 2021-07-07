@@ -395,7 +395,94 @@ SELECT COUNT(*) num FROM students;	#统计并设别名num
 
 ## 多表查询
 
+SELECT查询不但可以从一张表查询数据，还可以从多张表同时查询数据。查询多张表的语法是：`SELECT * FROM <表1> <表2>`。
 
+这种一次查询两个表的数据，查询的结果也是一个二维表，它是`students`表和`classes`表的“乘积”，即`students`表的每一行与`classes`表的每一行都两两拼在一起返回。结果集的列数是`students`表和`classes`表的列数之和，行数是`students`表和`classes`表的行数之积。使用多表查询可以获取M x N行记录；这种多表查询又称笛卡尔查询。多表查询的结果集可能非常巨大，要小心使用。
+
+| id   | class_id | name | gender | score | id   | name |
+| :--- | :------- | :--- | :----- | :---- | :--- | :--- |
+| 1    | 1        | 小明 | M      | 90    | 1    | 一班 |
+| 1    | 1        | 小明 | M      | 90    | 2    | 二班 |
+| 1    | 1        | 小明 | M      | 90    | 3    | 三班 |
+| 1    | 1        | 小明 | M      | 90    | 4    | 四班 |
+| 2    | 1        | 小红 | F      | 95    | 1    | 一班 |
+| 2    | 1        | 小红 | F      | 95    | 2    | 二班 |
+| 2    | 1        | 小红 | F      | 95    | 3    | 三班 |
+| 2    | 1        | 小红 | F      | 95    | 4    | 四班 |
+
+其中：students表 和 class表 都有id,列名重复，可以用区别名的方式解决。
+
+```sql
+SELECT
+    students.id sid,
+	classes.id cid,
+    classes.name cname
+FROM students, classes;
+```
+
+注意，多表查询时，要使用`表名.列名`这样的方式来引用列和设置别名，这样就避免了结果集的列名重复问题。但是，用`表名.列名`这种方式列举两个表的所有列实在是很麻烦，所以SQL还允许给表设置一个别名，让我们在投影查询中引用起来稍微简洁一点：
+
+```sql
+SELECT
+    s.id sid,
+    c.id cid,
+    c.name cname
+FROM students s, classes c;
+```
+
+注意到`FROM`子句给表设置别名的语法是`FROM <表名1> <别名1>, <表名2> <别名2>`。
 
 ## 连接查询
+
+连接查询是另一种类型的多表查询。连接查询对多个表进行JOIN运算，简单地说，就是先确定一个主表作为结果集，然后，把其他表的行有选择性地“连接”在主表结果集上。
+
+```sql
+SELECT s.id, s.name, s.class_id, s.gender, s.score FROM students s;
+
+SELECT s.id, s.name, s.class_id, c.name class_name, s.gender, s.score FROM students s
+INNER JOIN classes c ON s.class_id = c.id;		#将class表中的数据接到students表上
+```
+
+注意INNER JOIN查询的写法是：
+
+1. 先确定主表，仍然使用`FROM <表1>`的语法；
+2. 再确定需要连接的表，使用`INNER JOIN <表2>`的语法；
+3. 然后确定连接条件，使用`ON <条件...>`，这里的条件是`s.class_id = c.id`，表示`students`表的`class_id`列与`classes`表的`id`列相同的行需要连接；
+4. 可选：加上`WHERE`子句、`ORDER BY`等子句。
+
+
+
+有RIGHT OUTER JOIN，就有LEFT OUTER JOIN，以及FULL OUTER JOIN。它们的区别是：
+
+INNER JOIN只返回同时存在于两张表的行数据，由于`students`表的`class_id`包含1，2，3，`classes`表的`id`包含1，2，3，4，所以，INNER JOIN根据条件`s.class_id = c.id`返回的结果集仅包含1，2，3。
+
+RIGHT OUTER JOIN返回右表都存在的行。如果某一行仅在右表存在，那么结果集就会以`NULL`填充剩下的字段。
+
+LEFT OUTER JOIN则返回左表都存在的行。如果我们给students表增加一行，并添加class_id=5，由于classes表并不存在id=5的行，所以，LEFT OUTER JOIN的结果会增加一行，对应的`class_name`是`NULL`：
+
+对于这么多种JOIN查询，到底什么使用应该用哪种呢？其实我们用图来表示结果集就一目了然了。
+
+假设查询语句是：
+
+```
+SELECT ... FROM tableA ??? JOIN tableB ON tableA.column1 = tableB.column2;
+```
+
+我们把tableA看作左表，把tableB看成右表，那么INNER JOIN是选出两张表都存在的记录：
+
+![inner-join](https://www.liaoxuefeng.com/files/attachments/1246892164662976/l)
+
+LEFT OUTER JOIN是选出左表存在的记录：
+
+![left-outer-join](https://www.liaoxuefeng.com/files/attachments/1246893588481376/l)
+
+RIGHT OUTER JOIN是选出右表存在的记录：
+
+![right-outer-join](https://www.liaoxuefeng.com/files/attachments/1246893609222688/l)
+
+FULL OUTER JOIN则是选出左右表都存在的记录：
+
+![full-outer-join](https://www.liaoxuefeng.com/files/attachments/1246893632359424/l)
+
+# 4-修改
 

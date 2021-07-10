@@ -486,3 +486,223 @@ FULL OUTER JOIN则是选出左右表都存在的记录：
 
 # 4-修改
 
+关系数据库的基本操作就是增删改查，即CRUD：Create、Retrieve、Update、Delete。，而对于增、删、改，对应的SQL语句分别是：
+
+- INSERT：插入新记录；
+- UPDATE：更新已有记录；
+- DELETE：删除已有记录。
+
+## INSERT
+
+`INSERT`语句的基本语法是：
+
+```sql
+INSERT INTO <表名> (字段1, 字段2, ...) VALUES (值1, 值2, ...);
+
+INSERT INTO students (class_id, name, gender, score) VALUES
+  (1, '大宝', 'M', 87),
+  (2, '二宝', 'M', 81);
+```
+
+## UPDATE
+
+`UPDATE`语句的基本语法是：
+
+```sql
+UPDATE <表名> SET 字段1=值1, 字段2=值2, ... WHERE ...;
+-- SET score=score+10就是给当前行的score字段的值加上了10。
+UPDATE students SET score=score+10 WHERE score<80;
+```
+
+使用`UPDATE`，我们就可以一次更新表中的一条或多条记录。
+
+## DELETE
+
+`DELETE`语句的基本语法是：
+
+```sql
+DELETE FROM <表名> WHERE ...;
+```
+
+```sql
+-- 删除id=1的记录
+DELETE FROM students WHERE id=1;
+```
+
+注意到`DELETE`语句的`WHERE`条件也是用来筛选需要删除的行，因此和`UPDATE`类似，`DELETE`语句也可以一次删除多条记录：
+
+如果`WHERE`条件没有匹配到任何记录，`DELETE`语句不会报错，也不会有任何记录被删除。
+
+最后，要特别小心的是，和`UPDATE`类似，不带`WHERE`条件的`DELETE`语句会删除整个表的数据：
+
+# 5-MySQL
+
+## 管理MySQL
+
+打开命令提示符，输入命令`mysql -u root -p`，提示输入口令。填入MySQL的root口令，如果正确，就连上了MySQL Server，同时提示符变为`mysql>`：
+
+```ascii
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│Microsoft Windows [Version 10.0.0]                      │
+│(c) 2015 Microsoft Corporation. All rights reserved.    │
+│                                                        │
+│C:\> mysql -u root -p                                   │
+│Enter password: ******                                  │
+│                                                        │
+│Server version: 5.7                                     │
+│Copyright (c) 2000, 2018, ...                           │
+│Type 'help;' or '\h' for help.                          │
+│                                                        │
+│mysql>                                                  │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+```
+
+输入`exit`断开与MySQL Server的连接并返回到命令提示符。
+
+MySQL Client和MySQL Server的关系如下：
+
+```ascii
+┌──────────────┐  SQL   ┌──────────────┐
+│ MySQL Client │───────>│ MySQL Server │
+└──────────────┘  TCP   └──────────────┘
+```
+
+在MySQL Client中输入的SQL语句通过TCP连接发送到MySQL Server。默认端口号是3306，即如果发送到本机MySQL Server，地址就是`127.0.0.1:3306`。
+
+也可以只安装MySQL Client，然后连接到远程MySQL Server。假设远程MySQL Server的IP地址是`10.0.1.99`，那么就使用`-h`指定IP或域名：
+
+```bash
+mysql -h 10.0.1.99 -u root -p
+```
+
+命令行程序`mysql`实际上是MySQL客户端，真正的MySQL服务器程序是`mysqld`，在后台运行。
+
+### 数据库
+
+在一个运行MySQL的服务器上，实际上可以创建多个数据库（Database）。要列出所有数据库，使用命令：
+
+```mysql
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| shici              |
+| sys                |
+| test               |
+| school             |
++--------------------+
+```
+
+其中，`information_schema`、`mysql`、`performance_schema`和`sys`是系统库，不要去改动它们。其他的是用户创建的数据库。
+
+要创建一个新数据库，使用命令：
+
+```mysql
+mysql> CREATE DATABASE test;
+Query OK, 1 row affected (0.01 sec)
+```
+
+要删除一个数据库，使用命令：
+
+```mysql
+mysql> DROP DATABASE test;
+Query OK, 0 rows affected (0.01 sec)
+```
+
+注意：删除一个数据库将导致该数据库的所有表全部被删除。
+
+对一个数据库进行操作时，要首先将其切换为当前数据库：
+
+```mysql
+mysql> USE test;
+Database changed
+```
+
+### 表
+
+列出当前数据库的所有表，使用命令：
+
+```mysql
+mysql> SHOW TABLES;
++---------------------+
+| Tables_in_test      |
++---------------------+
+| classes             |
+| statistics          |
+| students            |
+| students_of_class1  |
++---------------------+
+```
+
+要查看一个表的结构，使用命令：
+
+```mysq
+mysql> DESC students;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | bigint(20)   | NO   | PRI | NULL    | auto_increment |
+| class_id | bigint(20)   | NO   |     | NULL    |                |
+| name     | varchar(100) | NO   |     | NULL    |                |
+| gender   | varchar(1)   | NO   |     | NULL    |                |
+| score    | int(11)      | NO   |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+```
+
+```mysql
+mysql> SHOW CREATE TABLE students;
++----------+-------------------------------------------------------+
+| students | CREATE TABLE `students` (                             |
+|          |   `id` bigint(20) NOT NULL AUTO_INCREMENT,            |
+|          |   `class_id` bigint(20) NOT NULL,                     |
+|          |   `name` varchar(100) NOT NULL,                       |
+|          |   `gender` varchar(1) NOT NULL,                       |
+|          |   `score` int(11) NOT NULL,                           |
+|          |   PRIMARY KEY (`id`)                                  |
+|          | ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 |
++----------+-------------------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+创建表使用`CREATE TABLE`语句，而删除表使用`DROP TABLE`语句：
+
+```mysql
+mysql> DROP TABLE students;
+Query OK, 0 rows affected (0.01 sec)
+```
+
+修改表就比较复杂。如果要给`students`表新增一列`birth`，使用：
+
+```mysql
+ALTER TABLE students ADD COLUMN birth VARCHAR(10) NOT NULL;
+```
+
+要修改`birth`列，例如把列名改为`birthday`，类型改为`VARCHAR(20)`：
+
+```mysql
+ALTER TABLE students CHANGE COLUMN birth birthday VARCHAR(20) NOT NULL;
+```
+
+要删除列，使用：
+
+```mysql
+ALTER TABLE students DROP COLUMN birthday;
+```
+
+### 退出MySQL
+
+使用`EXIT`命令退出MySQL：
+
+```mysql
+mysql> EXIT
+Bye
+```
+
+注意`EXIT`仅仅断开了客户端和服务器的连接，MySQL服务器仍然继续运行。

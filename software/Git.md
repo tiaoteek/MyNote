@@ -315,3 +315,14 @@ $ git log --graph		# 7、命令可以看到分支合并图。
 # 格式问题
 
 千万不要使用Windows自带的记事本编辑任何文本文件，他们自作聪明地在每个文件开头添加了0xefbbbf（十六进制）的字符。
+
+## 错误 warning: 
+
+### LF will be replaced by CRLF in ***
+
+windows中的换行符为 CRLF， 而在Linux下的换行符为LF，所以在执行add . 时出现提示：warning: LF will be replaced by CRLF in README.md. The file will have its original line endings in 
+
+```bash
+$ git config --global core.autocrlf false
+```
+

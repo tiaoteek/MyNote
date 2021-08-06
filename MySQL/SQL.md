@@ -407,7 +407,314 @@ SELECT class_id,gender, avg(score) avg_score from students group by class_id,gen
 
 ## 多表查询
 
+SELECT查询不但可以从一张表查询数据，还可以从多张表同时查询数据。查询多张表的语法是：`SELECT * FROM <表1> <表2>`。
 
+这种一次查询两个表的数据，查询的结果也是一个二维表，它是`students`表和`classes`表的“乘积”，即`students`表的每一行与`classes`表的每一行都两两拼在一起返回。结果集的列数是`students`表和`classes`表的列数之和，行数是`students`表和`classes`表的行数之积。使用多表查询可以获取M x N行记录；这种多表查询又称笛卡尔查询。多表查询的结果集可能非常巨大，要小心使用。
+
+| id   | class_id | name | gender | score | id   | name |
+| :--- | :------- | :--- | :----- | :---- | :--- | :--- |
+| 1    | 1        | 小明 | M      | 90    | 1    | 一班 |
+| 1    | 1        | 小明 | M      | 90    | 2    | 二班 |
+| 1    | 1        | 小明 | M      | 90    | 3    | 三班 |
+| 1    | 1        | 小明 | M      | 90    | 4    | 四班 |
+| 2    | 1        | 小红 | F      | 95    | 1    | 一班 |
+| 2    | 1        | 小红 | F      | 95    | 2    | 二班 |
+| 2    | 1        | 小红 | F      | 95    | 3    | 三班 |
+| 2    | 1        | 小红 | F      | 95    | 4    | 四班 |
+
+其中：students表 和 class表 都有id,列名重复，可以用区别名的方式解决。
+
+```sql
+SELECT
+    students.id sid,
+	classes.id cid,
+    classes.name cname
+FROM students, classes;
+```
+
+注意，多表查询时，要使用`表名.列名`这样的方式来引用列和设置别名，这样就避免了结果集的列名重复问题。但是，用`表名.列名`这种方式列举两个表的所有列实在是很麻烦，所以SQL还允许给表设置一个别名，让我们在投影查询中引用起来稍微简洁一点：
+
+```sql
+SELECT
+    s.id sid,
+    c.id cid,
+    c.name cname
+FROM students s, classes c;
+```
+
+注意到`FROM`子句给表设置别名的语法是`FROM <表名1> <别名1>, <表名2> <别名2>`。
 
 ## 连接查询
 
+连接查询是另一种类型的多表查询。连接查询对多个表进行JOIN运算，简单地说，就是先确定一个主表作为结果集，然后，把其他表的行有选择性地“连接”在主表结果集上。
+
+```sql
+SELECT s.id, s.name, s.class_id, s.gender, s.score FROM students s;
+
+SELECT s.id, s.name, s.class_id, c.name class_name, s.gender, s.score FROM students s
+INNER JOIN classes c ON s.class_id = c.id;		#将class表中的数据接到students表上
+```
+
+注意INNER JOIN查询的写法是：
+
+1. 先确定主表，仍然使用`FROM <表1>`的语法；
+2. 再确定需要连接的表，使用`INNER JOIN <表2>`的语法；
+3. 然后确定连接条件，使用`ON <条件...>`，这里的条件是`s.class_id = c.id`，表示`students`表的`class_id`列与`classes`表的`id`列相同的行需要连接；
+4. 可选：加上`WHERE`子句、`ORDER BY`等子句。
+
+
+
+有RIGHT OUTER JOIN，就有LEFT OUTER JOIN，以及FULL OUTER JOIN。它们的区别是：
+
+INNER JOIN只返回同时存在于两张表的行数据，由于`students`表的`class_id`包含1，2，3，`classes`表的`id`包含1，2，3，4，所以，INNER JOIN根据条件`s.class_id = c.id`返回的结果集仅包含1，2，3。
+
+RIGHT OUTER JOIN返回右表都存在的行。如果某一行仅在右表存在，那么结果集就会以`NULL`填充剩下的字段。
+
+LEFT OUTER JOIN则返回左表都存在的行。如果我们给students表增加一行，并添加class_id=5，由于classes表并不存在id=5的行，所以，LEFT OUTER JOIN的结果会增加一行，对应的`class_name`是`NULL`：
+
+对于这么多种JOIN查询，到底什么使用应该用哪种呢？其实我们用图来表示结果集就一目了然了。
+
+假设查询语句是：
+
+```
+SELECT ... FROM tableA ??? JOIN tableB ON tableA.column1 = tableB.column2;
+```
+
+我们把tableA看作左表，把tableB看成右表，那么INNER JOIN是选出两张表都存在的记录：
+
+![inner-join](https://www.liaoxuefeng.com/files/attachments/1246892164662976/l)
+
+LEFT OUTER JOIN是选出左表存在的记录：
+
+![left-outer-join](https://www.liaoxuefeng.com/files/attachments/1246893588481376/l)
+
+RIGHT OUTER JOIN是选出右表存在的记录：
+
+![right-outer-join](https://www.liaoxuefeng.com/files/attachments/1246893609222688/l)
+
+FULL OUTER JOIN则是选出左右表都存在的记录：
+
+![full-outer-join](https://www.liaoxuefeng.com/files/attachments/1246893632359424/l)
+
+# 4-修改
+
+关系数据库的基本操作就是增删改查，即CRUD：Create、Retrieve、Update、Delete。，而对于增、删、改，对应的SQL语句分别是：
+
+- INSERT：插入新记录；
+- UPDATE：更新已有记录；
+- DELETE：删除已有记录。
+
+## INSERT
+
+`INSERT`语句的基本语法是：
+
+```sql
+INSERT INTO <表名> (字段1, 字段2, ...) VALUES (值1, 值2, ...);
+
+INSERT INTO students (class_id, name, gender, score) VALUES
+  (1, '大宝', 'M', 87),
+  (2, '二宝', 'M', 81);
+```
+
+## UPDATE
+
+`UPDATE`语句的基本语法是：
+
+```sql
+UPDATE <表名> SET 字段1=值1, 字段2=值2, ... WHERE ...;
+-- SET score=score+10就是给当前行的score字段的值加上了10。
+UPDATE students SET score=score+10 WHERE score<80;
+```
+
+使用`UPDATE`，我们就可以一次更新表中的一条或多条记录。
+
+## DELETE
+
+`DELETE`语句的基本语法是：
+
+```sql
+DELETE FROM <表名> WHERE ...;
+```
+
+```sql
+-- 删除id=1的记录
+DELETE FROM students WHERE id=1;
+```
+
+注意到`DELETE`语句的`WHERE`条件也是用来筛选需要删除的行，因此和`UPDATE`类似，`DELETE`语句也可以一次删除多条记录：
+
+如果`WHERE`条件没有匹配到任何记录，`DELETE`语句不会报错，也不会有任何记录被删除。
+
+最后，要特别小心的是，和`UPDATE`类似，不带`WHERE`条件的`DELETE`语句会删除整个表的数据：
+
+# 5-MySQL
+
+## 管理MySQL
+
+打开命令提示符，输入命令`mysql -u root -p`，提示输入口令。填入MySQL的root口令，如果正确，就连上了MySQL Server，同时提示符变为`mysql>`：
+
+```ascii
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│Microsoft Windows [Version 10.0.0]                      │
+│(c) 2015 Microsoft Corporation. All rights reserved.    │
+│                                                        │
+│C:\> mysql -u root -p                                   │
+│Enter password: ******                                  │
+│                                                        │
+│Server version: 5.7                                     │
+│Copyright (c) 2000, 2018, ...                           │
+│Type 'help;' or '\h' for help.                          │
+│                                                        │
+│mysql>                                                  │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+```
+
+输入`exit`断开与MySQL Server的连接并返回到命令提示符。
+
+MySQL Client和MySQL Server的关系如下：
+
+```ascii
+┌──────────────┐  SQL   ┌──────────────┐
+│ MySQL Client │───────>│ MySQL Server │
+└──────────────┘  TCP   └──────────────┘
+```
+
+在MySQL Client中输入的SQL语句通过TCP连接发送到MySQL Server。默认端口号是3306，即如果发送到本机MySQL Server，地址就是`127.0.0.1:3306`。
+
+也可以只安装MySQL Client，然后连接到远程MySQL Server。假设远程MySQL Server的IP地址是`10.0.1.99`，那么就使用`-h`指定IP或域名：
+
+```bash
+mysql -h 10.0.1.99 -u root -p
+```
+
+命令行程序`mysql`实际上是MySQL客户端，真正的MySQL服务器程序是`mysqld`，在后台运行。
+
+### 数据库
+
+在一个运行MySQL的服务器上，实际上可以创建多个数据库（Database）。要列出所有数据库，使用命令：
+
+```mysql
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| shici              |
+| sys                |
+| test               |
+| school             |
++--------------------+
+```
+
+其中，`information_schema`、`mysql`、`performance_schema`和`sys`是系统库，不要去改动它们。其他的是用户创建的数据库。
+
+要创建一个新数据库，使用命令：
+
+```mysql
+mysql> CREATE DATABASE test;
+Query OK, 1 row affected (0.01 sec)
+```
+
+要删除一个数据库，使用命令：
+
+```mysql
+mysql> DROP DATABASE test;
+Query OK, 0 rows affected (0.01 sec)
+```
+
+注意：删除一个数据库将导致该数据库的所有表全部被删除。
+
+对一个数据库进行操作时，要首先将其切换为当前数据库：
+
+```mysql
+mysql> USE test;
+Database changed
+```
+
+### 表
+
+列出当前数据库的所有表，使用命令：
+
+```mysql
+mysql> SHOW TABLES;
++---------------------+
+| Tables_in_test      |
++---------------------+
+| classes             |
+| statistics          |
+| students            |
+| students_of_class1  |
++---------------------+
+```
+
+要查看一个表的结构，使用命令：
+
+```mysq
+mysql> DESC students;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | bigint(20)   | NO   | PRI | NULL    | auto_increment |
+| class_id | bigint(20)   | NO   |     | NULL    |                |
+| name     | varchar(100) | NO   |     | NULL    |                |
+| gender   | varchar(1)   | NO   |     | NULL    |                |
+| score    | int(11)      | NO   |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+```
+
+```mysql
+mysql> SHOW CREATE TABLE students;
++----------+-------------------------------------------------------+
+| students | CREATE TABLE `students` (                             |
+|          |   `id` bigint(20) NOT NULL AUTO_INCREMENT,            |
+|          |   `class_id` bigint(20) NOT NULL,                     |
+|          |   `name` varchar(100) NOT NULL,                       |
+|          |   `gender` varchar(1) NOT NULL,                       |
+|          |   `score` int(11) NOT NULL,                           |
+|          |   PRIMARY KEY (`id`)                                  |
+|          | ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 |
++----------+-------------------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+创建表使用`CREATE TABLE`语句，而删除表使用`DROP TABLE`语句：
+
+```mysql
+mysql> DROP TABLE students;
+Query OK, 0 rows affected (0.01 sec)
+```
+
+修改表就比较复杂。如果要给`students`表新增一列`birth`，使用：
+
+```mysql
+ALTER TABLE students ADD COLUMN birth VARCHAR(10) NOT NULL;
+```
+
+要修改`birth`列，例如把列名改为`birthday`，类型改为`VARCHAR(20)`：
+
+```mysql
+ALTER TABLE students CHANGE COLUMN birth birthday VARCHAR(20) NOT NULL;
+```
+
+要删除列，使用：
+
+```mysql
+ALTER TABLE students DROP COLUMN birthday;
+```
+
+### 退出MySQL
+
+使用`EXIT`命令退出MySQL：
+
+```mysql
+mysql> EXIT
+Bye
+```
+
+注意`EXIT`仅仅断开了客户端和服务器的连接，MySQL服务器仍然继续运行。

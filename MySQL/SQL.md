@@ -372,6 +372,9 @@ limit 5 offset 0;       # 每页5条第1页
 ```sql
 SELECT COUNT(*) FROM students;		#统计个数，COUNT(*)和COUNT(id)实际上是一样的效果。
 SELECT COUNT(*) num FROM students;	#统计并设别名num
+SELECT COUNT(*) boys FROM students WHERE gender = 'M';
+SELECT AVG(score) average FROM students WHERE gender = 'M';
+
 ```
 
 除了`COUNT()`函数外，SQL还提供了如下聚合函数：
@@ -390,6 +393,15 @@ SELECT COUNT(*) num FROM students;	#统计并设别名num
 注意，`MAX()`和`MIN()`函数并不限于数值类型。如果是字符类型，`MAX()`和`MIN()`会返回排序最后和排序最前的字符。
 
 要特别注意：如果聚合查询的`WHERE`条件没有匹配到任何行，`COUNT()`会返回0，而`SUM()`、`AVG()`、`MAX()`和`MIN()`会返回`NULL`：
+
+`GROUP BY`子句指定了按`class_id`分组，因此，执行该`SELECT`语句时，会把`class_id`相同的列先分组，再分别计算，因此，得到了3行结果。
+
+```sql
+#各个班级的学生人数：
+SELECT class_id, COUNT(*) num FROM students GROUP BY class_id;
+#请使用一条SELECT查询查出每个班级男生和女生的平均分：
+SELECT class_id,gender, avg(score) avg_score from students group by class_id,gender;
+```
 
 
 

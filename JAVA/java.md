@@ -51,9 +51,79 @@
 
 - JSR规范：Java Specification Request	（JSR是一系列的规范，为了保证Java语言的规范性）
 - JCP组织：Java Community Process       （负责审核JSR的组织就是JCP）
-
 - RI：Reference Implementation             （通常来说只是一个“能跑”的正确的代码，不追求速度）
 - TCK：Technology Compatibility Kit 
+
+## 安装jdk
+
+### 设置环境变量
+
+#### windows
+
+安装完JDK后，需要设置一个`JAVA_HOME`的环境变量，它指向JDK的安装目录。在Windows下，它是安装目录，类似：
+
+```bash
+C:\Program Files\Java\jdk-16
+```
+
+然后，把`JAVA_HOME`的`bin`目录附加到系统环境变量`PATH`上。在Windows下，它长这样：
+
+```
+Path=%JAVA_HOME%\bin;<现有的其他路径>
+```
+
+#### Linux
+
+```bash
+# 创建一个 /usr/java 目录
+$ mkdir /usr/java
+# 将之前下载的 tar 包解压到新建的目录下
+$ tar xzf jdk-8u271-linux-x64.tar.gz -C /usr/java
+
+$ vim /etc/profile
+export JAVA_HOME=/usr/java/jdk1.8.0_271
+export PATH=$JAVA_HOME/bin:$PATH
+#Java11之后不用设置以下
+export CLASSPATH=$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib
+```
+
+新加载配置文件，命令：
+
+```bash
+source /etc/profile 
+```
+
+把`JAVA_HOME`的`bin`目录添加到`PATH`中是为了在任意文件夹下都可以运行`java`。打开命令提示符窗口，输入命令`java -version`，如果一切正常，你会看到如下输出：
+
+```ascii
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│Microsoft Windows [Version 10.0.0]                      │
+│(c) 2015 Microsoft Corporation. All rights reserved.    │
+│                                                        │
+│C:\> java -version                                      │
+│java version "16" ...                                   │
+│Java(TM) SE Runtime Environment                         │
+│Java HotSpot(TM) 64-Bit Server VM                       │
+│                                                        │
+│C:\>                                                    │
+│                                                        │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+```
+
+### JDK
+
+细心的童鞋还可以在`JAVA_HOME`的`bin`目录下找到很多可执行文件：
+
+- java：这个可执行程序其实就是JVM，运行Java程序，就是启动JVM，然后让JVM执行指定的编译后的代码；
+- javac：这是Java的编译器，它用于把Java源码文件（以`.java`后缀结尾）编译为Java字节码文件（以`.class`后缀结尾）；
+- jar：用于把一组`.class`文件打包成一个`.jar`文件，便于发布；
+- javadoc：用于从Java源码中自动提取注释并生成文档；
+- jdb：Java调试器，用于开发阶段的运行调试。
+
+
 
 # java 入门
 
@@ -423,3 +493,190 @@ int n = (int) (d + 0.5);
 
 可以将浮点型强制转为整型，但超出范围后将始终返回整型的最大值。
 
+### 布尔运算
+
+对于布尔类型`boolean`，永远只有`true`和`false`两个值。
+
+布尔运算是一种关系运算，包括以下几类：
+
+- 比较运算符：`>`，`>=`，`<`，`<=`，`==`，`!=`
+- 与运算 `&&`
+- 或运算 `||`
+- 非运算 `!`
+
+关系运算符的优先级从高到低依次是：
+
+- `!`
+- `>`，`>=`，`<`，`<=`
+- `==`，`!=`
+- `&&`
+- `||`
+
+```java
+boolean isGreater = 5 > 3; // true
+int age = 12;
+boolean isZero = age == 0; // false
+boolean isNonZero = !isZero; // true
+boolean isAdult = age >= 18; // false
+boolean isTeenager = age >6 && age <18; // true
+```
+
+#### 短路运算
+
+布尔运算的一个重要特点是短路运算。如果一个布尔运算的表达式能提前确定结果，则后续的计算不再执行，直接返回结果。“**与**” 的时候有了“0”，“**或**” 的时候有了“1”。
+
+#### 三元运算符
+
+Java还提供一个三元运算符`b ? x : y`，它根据第一个布尔表达式的结果，分别返回后续两个表达式之一的计算结果。示例：
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int n = -100;
+        int x = n >= 0 ? n : -n;
+        System.out.println(x);
+    }
+}
+```
+
+## 字符和字符串
+
+### 字符类型
+
+字符类型`char`是基本数据类型，它是`character`的缩写。一个`char`保存一个Unicode字符：
+
+```java
+char c1 = 'A';
+char c2 = '中';
+```
+
+因为Java在内存中总是使用Unicode表示字符，所以，一个英文字符和一个中文字符都用一个`char`类型表示，它们都占用两个字节。要显示一个字符的Unicode编码，只需将`char`类型直接赋值给`int`类型即可：
+
+```java
+int n1 = 'A'; // 字母“A”的Unicodde编码是65
+```
+
+还可以直接用转义字符`\u`+Unicode编码来表示一个字符：
+
+```java
+// 注意是十六进制:
+char c3 = '\u0041'; // 'A'，因为十六进制0041 = 十进制65
+```
+
+### 字符串类型
+
+和`char`类型不同，字符串类型`String`是引用类型，我们用**双引号`"..."`表示字符串**。一个字符串可以存储0个到任意个字符：
+
+```java
+String s = ""; // 空字符串，包含0个字符
+String s1 = "A"; // 包含一个字符
+String s2 = "ABC"; // 包含3个字符
+String s3 = "中文 ABC"; // 包含6个字符，其中有一个空格
+```
+
+因为字符串使用双引号`"..."`表示开始和结束，那如果字符串本身恰好包含一个`"`字符怎么表示？例如，`"abc"xyz"`，编译器就无法判断中间的引号究竟是字符串的一部分还是表示字符串结束。这个时候，我们需要借助转义字符`\`：
+
+```java
+String s = "abc\"xyz"; // 包含7个字符: a, b, c, ", x, y, z
+```
+
+因为`\`是转义字符，所以，两个`\\`表示一个`\`字符：
+
+```java
+String s = "abc\\xyz"; // 包含7个字符: a, b, c, \, x, y, z
+```
+
+常见的转义字符包括：
+
+- `\"` 表示字符`"`
+- `\'` 表示字符`'`
+- `\\` 表示字符`\`
+- `\n` 表示换行符
+- `\r` 表示回车符
+- `\t` 表示Tab
+- `\u####` 表示一个Unicode编码的字符
+
+例如：
+
+```java
+String s = "ABC\n\u4e2d\u6587"; // 包含6个字符: A, B, C, 换行符, 中, 文
+```
+
+### 字符串连接
+
+Java的编译器对字符串做了特殊照顾：（字符不行，“ ”是字符串，’ ‘ 是字符）
+
+可以使用`+`连接任意字符串和其他数据类型，这样极大地方便了字符串的处理；
+
+如果用`+`连接字符串和其他数据类型，会将其他数据类型先自动转型为字符串；
+
+```java
+    String s1 = "Hello";
+    String s2 = "world";
+    String s = s1 + " " + s2 + "!";
+
+    int age = 25;
+    String s = "age is " + age;
+```
+
+### 多行字符串
+
+如果我们要表示多行字符串，使用+号连接会非常不方便：
+
+```java
+String s = "first line \n"
+         + "second line \n"
+         + "end";
+```
+
+从  **Java 13**  开始，字符串可以用`"""..."""`表示多行字符串（Text Blocks）了。
+
+### 不可变特性
+
+Java的字符串除了是一个引用类型外，还有个重要特点，就是字符串不可变。
+
+执行`String s = "hello";`时，JVM虚拟机先创建字符串`"hello"`，然后，把字符串变量`s`指向它：
+
+```ascii
+      s
+      │
+      ▼
+┌───┬───────────┬───┐
+│   │  "hello"  │   │
+└───┴───────────┴───┘
+```
+
+紧接着，执行`s = "world";`时，JVM虚拟机先创建字符串`"world"`，然后，把字符串变量`s`指向它：
+
+```ascii
+      s ──────────────┐
+                      │
+                      ▼
+┌───┬───────────┬───┬───────────┬───┐
+│   │  "hello"  │   │  "world"  │   │
+└───┴───────────┴───┴───────────┴───┘
+```
+
+原来的字符串`"hello"`还在，只是我们无法通过变量`s`访问它而已。因此，字符串的不可变是指字符串内容不可变。
+
+### 空值null
+
+引用类型的变量可以指向一个空值`null`，它表示不存在，即该变量不指向任何对象。例如：
+
+```java
+String s1 = null; // s1是null
+String s2; // 没有赋初值值，s2也是null
+String s3 = s1; // s3也是null
+String s4 = ""; // s4指向空字符串，不是null
+```
+
+注意要区分空值`null`和空字符串`""`，空字符串是一个有效的字符串对象，它不等于`null`。
+
+练习：
+
+请将一组int值视为字符的Unicode编码，然后将它们拼成一个字符串：
+
+        int a = 72;
+        int b = 105;
+        int c = 65281;
+        String s = “”+(char)a +(char)b +(char)c;

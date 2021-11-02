@@ -17,7 +17,7 @@ Proxies：选择代理节点
 从[ clash](https://github.com/Dreamacro/clash)下载，然后在下载的文件夹里打开终端，执行
 
 ```bash
-unzip clash-linux-armv7-xxx.gz
+gunzip clash-linux-armv7-xxx.gz
 mv clash-linux-armv7-xxx /usr/local/bin/clash
 chmod +x /usr/local/bin/clash
 ```

@@ -18,7 +18,7 @@ Proxies：选择代理节点
 
 ```bash
 gunzip clash-linux-armv7-xxx.gz
-mv clash-linux-armv7-xxx /usr/local/bin/clash
+sudo mv clash-linux-armv7-xxx /usr/local/bin/clash
 chmod +x /usr/local/bin/clash
 ```
 
